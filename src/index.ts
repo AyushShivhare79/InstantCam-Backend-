@@ -57,7 +57,6 @@ wss.on("connection", function connection(ws) {
       );
     }
   });
-  user = null;
 
   // user.send(JSON.stringify({ type: 'createOffer' }));
   // user.send("Paired successful!");
