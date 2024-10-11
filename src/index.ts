@@ -14,9 +14,9 @@ interface RoomType {
 
 let room = new Map<string, RoomType>();
 
-let users = [{}];
+let users: userType[] = [];
 // let user: WebSocket | null;
-let userId = 1;
+// let userId = 1;
 let count = 0;
 let roomId = 0;
 wss.on("connection", function connection(ws) {
@@ -38,8 +38,8 @@ wss.on("connection", function connection(ws) {
 
       roomId++;
       room.set(roomId.toString(), {
-        user1: users[userId - 2],
-        user2: users[userId - 1],
+        user1: users[0],
+        user2: users[1],
       });
       console.log("ROOM: ", room);
     } else if (count < 2) {
@@ -102,7 +102,7 @@ wss.on("connection", function connection(ws) {
   roomId = 0;
   console.log("roomId: ", roomId);
 
-  userId = 1;
+  // userId = 1;
   // console.log("DONE: ", users[1]);
 
   // users.push({})
