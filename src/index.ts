@@ -29,18 +29,50 @@ wss.on("connection", function connection(ws) {
   //Creating users
 
   // If user1 come and go then again if anyone come must be user1
+  let userWithId: userType;
+
+  function keyValue(map: any, searchKey: any) {
+    for (const [key, value] of map.entries()) {
+      if (value.user1.id === searchKey || value.user2.id === searchKey)
+        return key;
+    }
+    return undefined;
+  }
+  userWithId = { id: "user" + userId++, socket: ws };
 
   ws.on("close", function () {
     console.log("Inside");
-    console.log("InsideUser: ", users)
+    console.log("InsideUser: ");
     users.pop();
-    console.log("User left");
+    console.log("User left: ", userWithId.id);
+
+    console.log("THISONE: ", keyValue(room, userWithId.id));
+
+    const removeId = keyValue(room, userWithId.id);
+    //
+    const remove = room.get(removeId);
+
+    // Find which user and send to other disconnect and remove room
+
+    if (userWithId.id === remove?.user1.id) {
+      remove.user2.socket.send(
+        JSON.stringify({ message: "Other user disconnect" })
+      );
+    } else if (userWithId.id === remove?.user2.id) {
+      remove.user1.socket.send(
+        JSON.stringify({ message: "Other user disconnect" })
+      );
+    }
+
+    // Delete room to free memeory
+    room.delete(removeId);
   });
 
   if (users.length < 2) {
-
     console.log("users: ", users);
-    users.push({ id: "user" + userId++, socket: ws });
+    // users.push({ id: "user" + userId++, socket: ws });
+    users.push(userWithId);
+
     console.log(users);
     if (users.length === 2) {
       //Creating rooms
