@@ -16,7 +16,7 @@ let room = new Map<string, RoomType>();
 
 let users: userType[] = [];
 // let user: WebSocket | null;
-// let userId = 1;
+let userId = 1;
 let count = 0;
 let roomId = 0;
 wss.on("connection", function connection(ws) {
@@ -28,12 +28,21 @@ wss.on("connection", function connection(ws) {
 
   //Creating users
 
-  if (count < 2) {
-    count++;
+  // If user1 come and go then again if anyone come must be user1
+
+  ws.on("close", function () {
+    console.log("Inside");
+    console.log("InsideUser: ", users)
+    users.pop();
+    console.log("User left");
+  });
+
+  if (users.length < 2) {
+
     console.log("users: ", users);
     users.push({ id: "user" + userId++, socket: ws });
     console.log(users);
-    if (count >= 2) {
+    if (users.length === 2) {
       //Creating rooms
 
       roomId++;
@@ -42,11 +51,15 @@ wss.on("connection", function connection(ws) {
         user2: users[1],
       });
       console.log("ROOM: ", room);
-    } else if (count < 2) {
+    } else if (users.length < 2) {
       ws.send(JSON.stringify({ message: "Waiting for someone to connect!" }));
+      // ws.send(JSON.stringify({ user: "user1" }));
       return;
     }
   }
+
+  // users.pop();
+  // users.pop();
 
   // Sending message of pair successful both side
 
@@ -88,21 +101,37 @@ wss.on("connection", function connection(ws) {
     }
   });
 
-  console.log("userTest0: ", users);
-  users.pop();
-  console.log("userTest1: ", users);
-  users.pop();
-  console.log("userTest2: ", users);
-  count = 0;
+  // users[0].socket.on("close", function () {
+  //   users[1].socket.send(JSON.stringify({message: "Other user disconnected"}))
+  //   console.log("closed");
+  // });
 
-  console.log("roomTest0: ", room);
-  console.log("roomId: ", roomId);
-  room.delete(roomId.toString());
-  console.log("roomTest1: ", room);
-  roomId = 0;
-  console.log("roomId: ", roomId);
+  // users[1].socket.on("close", function () {
+  //   console.log("closed");
+  //   users[0].socket.send(JSON.stringify({message: "Other user disconnected"}))
+  // });
 
+  users.pop();
+  users.pop();
+  console.log("Removed users: ", users);
+
+  // console.log("userTest0: ", users);
+  // users.pop();
+  // console.log("userTest1: ", users);
+  // users.pop();
+  // console.log("userTest2: ", users);
+  // count = 0;
+
+  // console.log("roomTest0: ", room);
+  // console.log("roomId: ", roomId);
+  // room.delete(roomId.toString());
+  // console.log("roomTest1: ", room);
+  // roomId = 0;
+  // console.log("roomId: ", roomId);
   // userId = 1;
+
+  /// Till Here
+
   // console.log("DONE: ", users[1]);
 
   // users.push({})
