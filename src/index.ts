@@ -15,23 +15,12 @@ interface RoomType {
 let room = new Map<string, RoomType>();
 
 let users: userType[] = [];
-// let user: WebSocket | null;
 let userId = 1;
-let count = 0;
 let roomId = 0;
 wss.on("connection", function connection(ws) {
-  // if (!user) {
-  //   user = ws;
-  //   user.send(JSON.stringify({ message: "Waiting for someone to connect!" }));
-  //   return;
-  // }
-
-  //Creating users
-
-  // If user1 come and go then again if anyone come must be user1
   let userWithId: userType;
 
-  function keyValue(map: any, searchKey: any) {
+  function findRoomWithUserId(map: any, searchKey: any) {
     for (const [key, value] of map.entries()) {
       if (value.user1.id === searchKey || value.user2.id === searchKey)
         return key;
@@ -41,18 +30,8 @@ wss.on("connection", function connection(ws) {
   userWithId = { id: "user" + userId++, socket: ws };
 
   ws.on("close", function () {
-    console.log("Inside");
-    console.log("InsideUser: ");
-    users.pop();
-    console.log("User left: ", userWithId.id);
-
-    console.log("THISONE: ", keyValue(room, userWithId.id));
-
-    const removeId = keyValue(room, userWithId.id);
-    //
-    const remove = room.get(removeId);
-
-    // Find which user and send to other disconnect and remove room
+    const removeRoomId = findRoomWithUserId(room, userWithId.id);
+    const remove = room.get(removeRoomId);
 
     if (userWithId.id === remove?.user1.id) {
       remove.user2.socket.send(
@@ -64,19 +43,18 @@ wss.on("connection", function connection(ws) {
       );
     }
 
+    console.log("BeforeRoomDelete : ", room);
+
     // Delete room to free memeory
-    room.delete(removeId);
+    room.delete(removeRoomId);
+    console.log("AfterRoomDelete: ", room);
   });
 
   if (users.length < 2) {
-    console.log("users: ", users);
-    // users.push({ id: "user" + userId++, socket: ws });
     users.push(userWithId);
 
     console.log(users);
     if (users.length === 2) {
-      //Creating rooms
-
       roomId++;
       room.set(roomId.toString(), {
         user1: users[0],
@@ -85,13 +63,9 @@ wss.on("connection", function connection(ws) {
       console.log("ROOM: ", room);
     } else if (users.length < 2) {
       ws.send(JSON.stringify({ message: "Waiting for someone to connect!" }));
-      // ws.send(JSON.stringify({ user: "user1" }));
       return;
     }
   }
-
-  // users.pop();
-  // users.pop();
 
   // Sending message of pair successful both side
 
@@ -133,80 +107,7 @@ wss.on("connection", function connection(ws) {
     }
   });
 
-  // users[0].socket.on("close", function () {
-  //   users[1].socket.send(JSON.stringify({message: "Other user disconnected"}))
-  //   console.log("closed");
-  // });
-
-  // users[1].socket.on("close", function () {
-  //   console.log("closed");
-  //   users[0].socket.send(JSON.stringify({message: "Other user disconnected"}))
-  // });
-
   users.pop();
   users.pop();
   console.log("Removed users: ", users);
-
-  // console.log("userTest0: ", users);
-  // users.pop();
-  // console.log("userTest1: ", users);
-  // users.pop();
-  // console.log("userTest2: ", users);
-  // count = 0;
-
-  // console.log("roomTest0: ", room);
-  // console.log("roomId: ", roomId);
-  // room.delete(roomId.toString());
-  // console.log("roomTest1: ", room);
-  // roomId = 0;
-  // console.log("roomId: ", roomId);
-  // userId = 1;
-
-  /// Till Here
-
-  // console.log("DONE: ", users[1]);
-
-  // users.push({})
-  //HERE
-  // ws.send(JSON.stringify({ message: "Paired successful!" }));
-
-  // user.send(JSON.stringify({ user: "user1" }));
-  // ws.send(JSON.stringify({ user: "user2" }));
-
-  // user.on("message", function message(data: any) {
-  //   const message = JSON.parse(data);
-  //   if (message.type === "createOffer") {
-  //     ws?.send(JSON.stringify({ type: "createOffer", sdp: message.sdp }));
-  //   }
-  //   if (message.type === "iceCandidate") {
-  //     ws?.send(
-  //       JSON.stringify({ type: "iceCandidate", candidate: message.candidate })
-  //     );
-  //   }
-  // });
-
-  // ws.on("message", function message(data: any) {
-  //   const message = JSON.parse(data);
-  //   if (message.type === "createAnswer") {
-  //     user?.send(JSON.stringify({ type: "createAnswer", sdp: message.sdp }));
-  //   }
-  //   if (message.type === "iceCandidate") {
-  //     user?.send(
-  //       JSON.stringify({ type: "iceCandidate", candidate: message.candidate })
-  //     );
-  //   }
-  // });
-  //TIll
-  // ws.on("close", () => {
-  //   user?.send(JSON.stringify({ message: "WS user disconnected" }));
-  //   user = null;
-  // });
-
-  // user.on("close", () => {
-  //   ws?.send(JSON.stringify({ message: "User disconnected" }));
-  //   user = null;
-  // });
-
-  // user.send(JSON.stringify({ type: 'createOffer' }));
-  // user.send("Paired successful!");
 });
