@@ -2,6 +2,8 @@ import { WebSocket, WebSocketServer } from "ws";
 
 const wss = new WebSocketServer({ port: 8080 });
 
+// Make type of string as well like iceCandidates etc so, no error will be there
+
 interface userType {
   id: string;
   socket: WebSocket;
